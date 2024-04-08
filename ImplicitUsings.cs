@@ -1,0 +1,11 @@
+﻿global using BoDi;
+global using J_E_LexisNexisTask.Config;
+global using J_E_LexisNexisTask.Drivers;
+global using J_E_LexisNexisTask.Pages;
+global using J_E_LexisNexisTask.Supports;
+global using NUnit.Framework;
+global using OpenQA.Selenium;
+global using OpenQA.Selenium.Interactions;
+global using OpenQA.Selenium.Support.UI;
+global using SeleniumExtras.WaitHelpers;
+global using TechTalk.SpecFlow;
