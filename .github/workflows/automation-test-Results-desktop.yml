@@ -1,0 +1,49 @@
+name: Run Tests and Notify Slack
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+        continue-on-error: true
+
+      - name: Check test results
+        id: test-results
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "status=success" >> $GITHUB_ENV
+          else
+            echo "status=failure" >> $GITHUB_ENV
+          fi
+
+      - name: Send notification to Slack
+        if: always()
+        run: |
+          if [ "${{ env.status }}" == "success" ]; then
+            message="Tests passed successfully! 🎉"
+          else
+            message="Some tests failed. 🚨"
+          fi
+          payload="{
+            \"text\": \"$message\"
+          }"
+          curl -X POST -H 'Content-type: application/json' --data "$payload" ${{ secrets.SLACK_WEBHOOK_URL }}
