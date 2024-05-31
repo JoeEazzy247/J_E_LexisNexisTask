@@ -1,0 +1,74 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: My automated test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+      continue-on-error: true
+
+    - name: Check test results
+      id: test-results
+      run: |
+          if [ $? -eq 0 ]; then
+            echo "status=success" >> $GITHUB_ENV
+          else
+            echo "status=failure" >> $GITHUB_ENV
+          fi
+    - name: Send notification to Slack
+      if: always()
+      env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_ACTOR: ${{ github.actor }}
+      run: |
+          if [ "${{ env.status }}" == "success" ]; then
+            message="Hey Joe: Tests passed successfully! 🎉"
+          else
+            message="Some tests failed. 🚨"
+          fi
+          
+          # Construct the test result link
+          test_result_url="https://github.com/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}"
+          payload="{
+            \"text\": \"$message\",
+            \"attachments\": [
+              {
+                \"fallback\": \"View test results\",
+                \"actions\": [
+                  {
+                    \"type\": \"button\",
+                    \"text\": \"View Test Result\",
+                    \"url\": \"$test_result_url\",
+                    \"style\": \"primary\"
+                  }
+                ]
+              }
+            ]
+          }"
+          
+          # Send the notification to Slack
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
