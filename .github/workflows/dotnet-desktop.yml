@@ -34,11 +34,10 @@ jobs:
           else
             echo "status=failure" >> $GITHUB_ENV
           fi
-
       - name: Send notification to Slack
         if: always()
         env:
-          SLACK_WEBHOOK_URL: ${{ SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_RUN_ID: ${{ github.run_id }}
           GITHUB_SHA: ${{ github.sha }}
