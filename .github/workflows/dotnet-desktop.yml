@@ -37,13 +37,20 @@ jobs:
 
       - name: Send notification to Slack
         if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ SLACK_WEBHOOK_URL }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_ACTOR: ${{ github.actor }}
         run: |
           if [ "${{ env.status }}" == "success" ]; then
-            message="Hey Joe: Git automated test run- passed successfully! 🎉"
+            message="Hey Joe: Tests passed successfully! 🎉"
           else
             message="Some tests failed. 🚨"
           fi
-         
+          
+          # Construct the test result link
           test_result_url="https://github.com/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}"
           payload="{
             \"text\": \"$message\",
