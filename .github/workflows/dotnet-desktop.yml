@@ -39,11 +39,28 @@ jobs:
         if: always()
         run: |
           if [ "${{ env.status }}" == "success" ]; then
-            message="Tests passed successfully! 🎉"
+            message="Hey Joe: Git automated test run- passed successfully! 🎉"
           else
             message="Some tests failed. 🚨"
           fi
+         
+          test_result_url="https://github.com/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}"
           payload="{
-            \"text\": \"$message\"
+            \"text\": \"$message\",
+            \"attachments\": [
+              {
+                \"fallback\": \"View test results\",
+                \"actions\": [
+                  {
+                    \"type\": \"button\",
+                    \"text\": \"Run Tests\",
+                    \"url\": \"$test_result_url\",
+                    \"style\": \"primary\"
+                  }
+                ]
+              }
+            ]
           }"
-          curl -X POST -H 'Content-type: application/json' --data "$payload" ${{ secrets.SLACK_WEBHOOK_URL }}
+          
+          # Send the notification to Slack
+          curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK_URL
