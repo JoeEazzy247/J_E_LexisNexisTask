@@ -10,7 +10,7 @@ public class DriverContext
     public IWebDriver StartDriver()
     {
         ChromeOptions options = new ChromeOptions();
-        options.AddArguments("--start-maximized", "--incognito");
+        options.AddArguments("--start-maximized", "--incognito", "--headless");
         driver = new ChromeDriver(options);
         return driver;
     }
