@@ -14,16 +14,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
         with:
-          node-version: '14'
-
+          dotnet-version: 8.0.x
+          
       - name: Install dependencies
         run: npm install
 
+      #-----------------------------------------------------------------
       - name: Run tests
-        run: npm test
+        run: dotnet test --no-build --verbosity normal
         continue-on-error: true
 
       - name: Check test results
